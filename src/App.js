@@ -1,25 +1,44 @@
-import logo from './logo.svg';
 import './App.css';
+import { useState } from 'react';
+import TodoList from './components/TodoList'
+import NewTodo from './components/NewTodo'
 
 function App() {
+  let [items, updateItem] = useState(
+    [
+    {
+      name: "item 1",
+      description: "d"
+    },
+    {
+      name: "item 2",
+      description: "d"
+    },
+    {
+      name: "item 3",
+      description: "d"
+    }
+    ])
+
+    
+
+    let handleNewItem = (event, name) => {
+      event.preventDefault();
+      let newItem = {
+        name: name,
+        description: name
+      }
+      updateItem((oldItems) => {return oldItems.concat(newItem);})
+    }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <TodoList todoItems={items}/>
+      <NewTodo addNewItem={handleNewItem}/>
     </div>
   );
 }
+
+// jsx
 
 export default App;
