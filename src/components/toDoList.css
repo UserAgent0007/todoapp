@@ -1,0 +1,13 @@
+ul{
+    list-style: none;
+
+    
+    
+}
+
+.list_style{
+    display: flex;
+    justify-content: space-around;
+
+    margin:2rem;
+}
