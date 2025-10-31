@@ -5,16 +5,16 @@ function TodoList({ todoItems, onCheckChange, onDelete }) {
     <div>
       <ul>
         {todoItems.map((item, index) => (
-          <li key={index}>
+          <li key={index} class="list_style_to_do">
             <input
               type="checkbox"
               checked={item.checked}
               onChange={(e) => onCheckChange(index, e.target.checked)}
             />
-            {item.name}
+            {item.name_task}
             <p>{item.description}</p>
 
-            <button onClick={() => onDelete(index)}>Видалити</button>
+            <button class="delete-button" onClick={() => onDelete(index)}>Видалити</button>
           </li>
         ))}
       </ul>

@@ -8,13 +8,13 @@ function To_do({ todoItems, onCheckChange }) {
           .map((item, originalIndex) => ({ item, originalIndex }))
           .filter(({ item }) => !item.checked)
           .map(({ item, originalIndex }) => (
-            <li key={originalIndex}>
+            <li key={originalIndex} class="list_style">
               <input
                 type="checkbox"
                 checked={item.checked}
                 onChange={(e) => onCheckChange(originalIndex, e.target.checked)}
               />
-              {item.name}
+              {item.name_task}
               <p>{item.description}</p>
             </li>
           ))}

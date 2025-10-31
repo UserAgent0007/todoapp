@@ -7,11 +7,31 @@ import { Routes, Route, Link } from 'react-router-dom';
 import Done from './components/Done';
 
 function App() {
-  const [items, setItems] = useState([
-    { name: "item 1", description: "d", checked: false },
-    { name: "item 2", description: "d", checked: false },
-    { name: "item 3", description: "d", checked: false },
-  ]);
+  // const [items, setItems] = useState([
+  //   { name: "item 1", description: "d", checked: false },
+  //   { name: "item 2", description: "d", checked: false },
+  //   { name: "item 3", description: "d", checked: false },
+  // ]);
+
+  const [items, setItems] = useState([]);
+  const url = "http://localhost:3000/"
+
+  const fetchItems = async () => {
+    const response = await fetch('http://localhost:3000/');
+    const data = await response.json();
+    setItems(data);
+  };
+
+  useEffect(() => {
+    fetch(url)  // або інший endpoint API
+      .then(response => response.json())  // перетворення відповіді у JSON
+      .then(data => {
+        setItems(data);  // зберігаємо отримані дані у state
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }, []);
+
+  // console.log(items)
 
   const [stats, setStats] = useState({
     total: 0,
@@ -32,26 +52,93 @@ function App() {
     });
   }, [items]);
 
-  const handleNewItem = (event, name) => {
+  const handleNewItem = async (event, name1) => {
     event.preventDefault();
+    // console.log("here");
     const newItem = {
-      name,
-      description: name,
+      name_task: name1,
+      description: name1,
       checked: false,
     };
-    setItems(oldItems => [...oldItems, newItem]);
+    await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: "include",
+      body: JSON.stringify(newItem),
+    })
+      .catch((err) => {
+
+        console.log("error oqured during fetchig (Post request)");
+      });
+    
+    await fetchItems();
+
+    // setItems(oldItems => [...oldItems, newItem]);
   };
 
-  const handleCheckChange = (index, isChecked) => {
+  const handleCheckChange = async (index, isChecked) => {
+    console.log(index)
+    const id_to_update = items[index]._id;
+    console.log(id_to_update);
+    const updatedItem = items[index];
+    const body_to_upd = {
+      checked: isChecked
+    };
+
     setItems(prevItems => {
-      const newItems = [...prevItems];
-      newItems[index].checked = isChecked;
-      return newItems;
-    });
+        const newItems = [...prevItems];
+        newItems[index].checked = isChecked;
+        return newItems;
+      });
+
+    try {
+      const response = await fetch(`http://localhost:3000/${id_to_update}`, {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: "include",
+        body: JSON.stringify(body_to_upd)
+      });
+
+      if (!response.ok) {
+        throw new Error("failed request put");
+      }
+
+      
+
+      const result = await response.json();
+
+      console.log("Succsessfull update", result);
+    }
+    catch (err) {
+      console.log("fail " + err.message)
+      setItems(prevItems => {
+        const newItems = [...prevItems];
+        newItems[index].checked = !isChecked;
+        return newItems;
+      });
+    }
+
+
   };
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
+    let id_to_delete = items[index]._id;
+    const deletedItem = items[index];
+
     setItems(prevItems => prevItems.filter((item, i) => i !== index));
+    await fetch(`http://localhost:3000/${id_to_delete}`, {
+      method: "DELETE",
+      credentials: "include"
+    })
+      .catch((err) => {
+        setItems(prevItems => [...prevItems.slice(0, index), deletedItem, ...prevItems.slice(index)]);
+        console.log("failed to delete");
+      });
+    
   };
 
   return (

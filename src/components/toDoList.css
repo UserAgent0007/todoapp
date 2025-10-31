@@ -1,13 +1,35 @@
-ul{
+ul {
     list-style: none;
-
-    
-    
+    padding: 0;
+    margin: 0;
 }
 
-.list_style{
-    display: flex;
-    justify-content: space-around;
+.list_style {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr; /* checkbox, name, description */
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    margin: 0.5rem 0;
+}
 
-    margin:2rem;
+.list_style_to_do {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr 150px; /* checkbox, name, description */
+    /* gap: 1rem;   */
+    align-items: center;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: solid blue 2px
+
+}
+
+.list_style input[type="checkbox"] {
+    justify-self: center;
+}
+
+.delete-button {
+    width: 150px;
+    padding: 0.5rem 1rem;
+    white-space: nowrap; /* Щоб текст не переносився */
 }
