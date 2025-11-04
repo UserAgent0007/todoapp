@@ -4,8 +4,8 @@ export const getTasks = async (req, res) => {
 
     try {
         console.log("Get tasks endpoint reached");
-        const tasks = await Task.find();
-        console.log(tasks);
+        const tasks = await Task.find({user:req.user.user_id});
+        
         res.json(tasks);
     }
     catch (err) {
@@ -15,9 +15,15 @@ export const getTasks = async (req, res) => {
 
 export const createTask = async (req, res) => {
     try {
-        console.log("rECEIVED BODY")
 
-        const task = new Task(req.body);
+        const {name_task, description, checked} = req.body;
+        
+        const task = new Task({
+            name_task:name_task,
+            description:description,
+            checked:checked,
+            user:req.user.user_id
+        });    
         console.log("CREATED TASK");
         await task.save();
         res.status(201).json(task);

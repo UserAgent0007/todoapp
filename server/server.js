@@ -2,16 +2,28 @@ import express from "express"
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./services/db.js";
-import taskRoutes from "./taskRoutes.js"
+import taskRoutes from "./taskRoutes.js";
+import authRoutes from "./authRoutes.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 const app = express();
 
 // --- CORS setup (allow only your UI domain) --- 
-const allowedOrigin = process.env.CLIENT_ORIGIN || "http://localhost:3001"
+const allowedOrigin = process.env.CLIENT_ORIGIN.split(",")
 app.use(
     cors({
-        origin:allowedOrigin,
+        origin:(origin, callback)=>{
+            if (!origin){
+                return callback(null, true); // повертаємо дозвіл чи можна виконувати будь-які запити, 1 параметр чи буде передана помилка error, 2 параметр - дозвіл на доступ
+            }
+
+            if (allowedOrigin.includes(origin)){
+                return callback(null ,true);
+            }
+
+            return callback (new Error("Not allowed by CORS"), false);
+        },
         methods:["GET", "POST", "DELETE", "PUT"],
         // запрошує перевірку користувача (логін, пароль, email)
         credentials:true
@@ -20,12 +32,14 @@ app.use(
 
 // --- Middleware ---
 // Він розбирає тіло запиту у JavaScript﻿-об’єкт і записує його у властивість req.body
+app.use(cookieParser());
 app.use(express.json());
 
 // --- Routes ---
 app.use(
     
-    taskRoutes
+    taskRoutes,
+    authRoutes
 );
 
 // --- DB Connection --- 

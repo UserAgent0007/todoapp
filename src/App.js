@@ -5,6 +5,9 @@ import To_do from './components/To_do';
 import NewTodo from './components/NewTodo';
 import { Routes, Route, Link } from 'react-router-dom';
 import Done from './components/Done';
+import Login from './components/authorization/Login.js';
+import LogOut from './components/authorization/Logout.js';
+import Register from './components/authorization/Register.js';
 
 function App() {
   // const [items, setItems] = useState([
@@ -14,22 +17,45 @@ function App() {
   // ]);
 
   const [items, setItems] = useState([]);
-  const url = "http://localhost:3000/"
+  const url = "http://localhost:3000/";
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  async function checkAuth() {
+
+    try {
+      const res = await fetch(url + 'auth/check', { credentials: 'include' });
+      if (res.status == 200) {
+        setIsAuthenticated(true);
+      } else {
+        console.log("RIGHT WAY");
+        setIsAuthenticated(false);
+      }
+    } catch {
+      setIsAuthenticated(false);
+
+    }
+  }
+
+  useEffect (()=>{
+    checkAuth();
+  }, [])
 
   const fetchItems = async () => {
-    const response = await fetch('http://localhost:3000/');
-    const data = await response.json();
-    setItems(data);
+    const response = await fetch('http://localhost:3000/', { credentials: "include" });
+
+    if (response.ok){
+      const data = await response.json();
+      setItems(data);
+    }
+    
   };
 
   useEffect(() => {
-    fetch(url)  // або інший endpoint API
-      .then(response => response.json())  // перетворення відповіді у JSON
-      .then(data => {
-        setItems(data);  // зберігаємо отримані дані у state
-      })
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
+    if (isAuthenticated) {
+      fetchItems();
+    }
+  }, [isAuthenticated]);
 
   // console.log(items)
 
@@ -72,7 +98,7 @@ function App() {
 
         console.log("error oqured during fetchig (Post request)");
       });
-    
+
     await fetchItems();
 
     // setItems(oldItems => [...oldItems, newItem]);
@@ -88,10 +114,10 @@ function App() {
     };
 
     setItems(prevItems => {
-        const newItems = [...prevItems];
-        newItems[index].checked = isChecked;
-        return newItems;
-      });
+      const newItems = [...prevItems];
+      newItems[index].checked = isChecked;
+      return newItems;
+    });
 
     try {
       const response = await fetch(`http://localhost:3000/${id_to_update}`, {
@@ -107,7 +133,7 @@ function App() {
         throw new Error("failed request put");
       }
 
-      
+
 
       const result = await response.json();
 
@@ -121,7 +147,6 @@ function App() {
         return newItems;
       });
     }
-
 
   };
 
@@ -138,11 +163,37 @@ function App() {
         setItems(prevItems => [...prevItems.slice(0, index), deletedItem, ...prevItems.slice(index)]);
         console.log("failed to delete");
       });
-    
+
   };
+
+  if (!isAuthenticated){
+    return (
+      
+      <div>
+        <div  class="links">
+          <p>
+            <Link to="/login">Log-in</Link>
+          </p>
+          <p>
+            <Link to="/register">Register</Link>
+          </p>
+        </div>
+        
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login setIsAuthenticated = {setIsAuthenticated} />} />
+        </Routes>
+      </div>
+      
+    )
+  }
 
   return (
     <div className="App">
+      <div>
+        <p>Welcome, {localStorage.getItem('name')}</p>
+        
+      </div>
       <div class="stats-container">
         <div class="stat-item">
           <h3>Всього завдань</h3>
@@ -167,11 +218,16 @@ function App() {
         <p>
           <Link to="/done">Виконані завдання</Link>
         </p>
+        <p>
+          <Link to="/log_out">Log-out</Link>
+        </p>
       </div>
       <Routes>
         <Route path="/done" element={<Done todoItems={items} onCheckChange={handleCheckChange} />} />
         <Route path="/to_do" element={<To_do todoItems={items} onCheckChange={handleCheckChange} />} />
         <Route path="/all" element={<TodoList todoItems={items} onCheckChange={handleCheckChange} onDelete={handleDelete} />} />
+        <Route path="/login" element={<Login setIsAuthenticated = {setIsAuthenticated} />} />
+        <Route path="/log_out" element={<LogOut setIsAuthenticated={setIsAuthenticated}/>} />
       </Routes>
       <NewTodo addNewItem={handleNewItem} />
     </div>
